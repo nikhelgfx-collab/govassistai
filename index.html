@@ -1,0 +1,1486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GovAssist AI Assistant</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom font */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        
+        :root {
+            --color-primary: #1e3a8a; /* Deep Blue (Official) */
+            --color-accent: #3b82f6; /* Lighter Blue */
+            --color-background: #f4f6f9;
+            --color-text: #1f2937;
+            --color-white: #ffffff;
+            --color-red: #ef4444;
+            --color-green: #10b981;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-primary);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+        }
+        
+        /* Layout Structure for Full App Mode */
+        .app-container-main {
+            display: flex;
+            min-height: 100vh;
+            width: 100%;
+        }
+
+        /* Home Page Centered Layout */
+        .home-container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--color-background);
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .home-card {
+            background-color: var(--color-white);
+            padding: 3rem 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .home-title {
+            font-size: 2.25rem;
+            font-weight: 800;
+            color: var(--color-primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        @media (min-width: 768px) {
+            .home-title {
+                font-size: 2.5rem;
+            }
+        }
+
+        .home-subtitle {
+            font-size: 1rem;
+            color: #4b5563;
+            margin-bottom: 2rem;
+        }
+        
+        @media (min-width: 768px) {
+            .home-subtitle {
+                font-size: 1.125rem;
+            }
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 0.75rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            transition: all 0.15s ease;
+            text-align: center;
+        }
+
+        .login-input:focus {
+            outline: none;
+            border-color: var(--color-accent);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+        }
+
+        .login-error {
+            color: var(--color-red);
+            font-weight: 600;
+            margin-top: -1rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .start-button {
+            padding: 1rem 2.5rem;
+            background-color: var(--color-accent);
+            color: var(--color-white);
+            font-size: 1.125rem;
+            font-weight: 700;
+            border-radius: 0.75rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 6px 15px -3px rgba(59, 130, 246, 0.4);
+            width: 100%;
+        }
+
+        .start-button:hover {
+            background-color: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px -3px rgba(59, 130, 246, 0.6);
+        }
+
+        .start-button:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+        }
+
+        /* Sidebar Styling (Only visible in 'full' mode) */
+        .sidebar {
+            width: 64px; /* Mobile width */
+            background-color: var(--color-primary);
+            color: var(--color-white);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 1rem;
+            box-shadow: 4px 0 10px rgba(0, 0, 0, 0.2);
+            transition: width 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .sidebar-title {
+            font-size: 1.5rem;
+            font-weight: 900;
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+        
+        .sidebar-title .desktop-only { display: none; }
+
+        .nav-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .nav-button {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            padding: 0.75rem 0.5rem;
+            border-radius: 0.5rem;
+            transition: all 0.15s ease;
+            background: none;
+            border: none;
+            color: var(--color-white);
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .nav-button:hover {
+            background-color: rgba(59, 130, 246, 0.3);
+        }
+
+        .nav-button.active {
+            background-color: var(--color-white);
+            color: var(--color-primary);
+            font-weight: 700;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-button-icon {
+            width: 1.5rem;
+            height: 1.5rem;
+            margin-right: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        .nav-button-text { display: none; }
+
+        .nav-badge {
+            display: none; /* Hide on mobile by default */
+        }
+        
+        .sidebar-footer {
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(59, 130, 246, 0.5);
+            font-size: 0.75rem;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.75);
+            word-break: break-all;
+        }
+        
+        .sidebar-footer .desktop-only { display: none; }
+
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            background-color: var(--color-background);
+            padding: 1rem;
+            overflow: auto;
+        }
+
+        .content-area {
+            height: 100%;
+        }
+        
+        /* Responsive Breakpoint (md: 768px) */
+        @media (min-width: 768px) {
+            .sidebar {
+                width: 256px; /* Desktop width */
+                padding: 2rem 1.5rem;
+            }
+            
+            .sidebar-title .desktop-only { display: block; }
+            .sidebar-title .mobile-only { display: none; }
+            
+            .nav-button {
+                padding: 0.75rem 1rem;
+            }
+
+            .nav-button-text { 
+                display: block; 
+                flex: 1; 
+                text-align: left;
+            }
+
+            .nav-button-icon {
+                /* Fix alignment on desktop */
+                margin-right: 1rem;
+            }
+
+            .nav-badge {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0.25rem 0.5rem;
+                margin-left: 0.5rem;
+                font-size: 0.75rem;
+                font-weight: 600;
+                line-height: 1;
+                border-radius: 9999px;
+            }
+            
+            .nav-button.active .nav-badge {
+                background-color: var(--color-primary);
+                color: var(--color-white);
+            }
+            
+            .nav-button:not(.active) .nav-badge {
+                background-color: var(--color-white);
+                color: var(--color-primary);
+            }
+            
+            .sidebar-footer {
+                text-align: left;
+                height: 40px; /* Hide the footer text, as it was only for user ID */
+            }
+            
+            .sidebar-footer .desktop-only, .sidebar-footer .user-id-text { display: none; }
+
+            .main-content {
+                padding: 2rem;
+            }
+        }
+        
+        /* Chat Specific Styling */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            background-color: var(--color-white);
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .chat-header {
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            background-color: var(--color-primary);
+            color: var(--color-white);
+            border-top-left-radius: 0.75rem;
+            border-top-right-radius: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .lang-button {
+            padding: 0.25rem 0.75rem;
+            font-size: 0.875rem;
+            border-radius: 0.25rem;
+            transition: all 0.15s ease;
+            background: none;
+            border: 1px solid var(--color-white);
+            color: var(--color-white);
+            cursor: pointer;
+        }
+        
+        .lang-button:hover:not(.active) {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--color-white);
+        }
+        
+        .lang-button.active {
+            background-color: var(--color-white);
+            color: var(--color-text);
+            font-weight: 700;
+            border-color: var(--color-white);
+        }
+
+        .chat-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        /* Custom Scrollbar for Chat Body */
+        .chat-body::-webkit-scrollbar { width: 8px; }
+        .chat-body::-webkit-scrollbar-thumb {
+            background-color: #bfdbfe; /* Light blue */
+            border-radius: 4px;
+        }
+        .chat-body::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .chat-footer {
+            padding: 1rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .chat-form {
+            display: flex;
+            gap: 0.75rem;
+        }
+        
+        .chat-input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            transition: all 0.15s ease;
+        }
+        
+        .chat-input:focus {
+            outline: none;
+            border-color: var(--color-accent);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+        }
+
+        .send-button {
+            padding: 0.75rem 1.5rem;
+            background-color: var(--color-primary);
+            color: var(--color-white);
+            font-weight: 600;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.15s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .send-button:hover {
+            background-color: #1e40af; /* slightly darker primary */
+        }
+        
+        .send-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Chat Message Bubbles */
+        .chat-message-row {
+            display: flex;
+        }
+        
+        .chat-user { justify-content: flex-end; }
+        .chat-assistant { justify-content: flex-start; }
+
+        .chat-bubble {
+            max-width: 75%;
+            padding: 0.75rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .chat-bubble-user { 
+            background-color: #eff6ff; /* light blue */
+            color: #1f2937;
+            border-radius: 1rem 1rem 0.25rem 1rem; 
+        }
+        .chat-bubble-ai { 
+            background-color: #e0f2fe; /* very light blue */
+            color: #1f2937;
+            border-radius: 1rem 1rem 1rem 0.25rem; 
+        }
+        
+        .chat-bubble-error {
+            background-color: #fef2f2;
+            border: 1px solid #fca5a5;
+            color: #991b1b;
+        }
+
+
+        .message-text {
+            white-space: pre-wrap;
+        }
+        
+        .message-loading {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.25rem;
+        }
+        
+        .loading-dot {
+            width: 0.75rem;
+            height: 0.75rem;
+            background-color: var(--color-accent);
+            border-radius: 50%;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .source-container {
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid #d1d5db;
+            font-size: 0.75rem;
+            color: #4b5563;
+        }
+        
+        .source-list {
+            list-style: disc;
+            padding-left: 1.25rem;
+            margin-top: 0.25rem;
+            line-height: 1.4;
+        }
+        
+        .source-link {
+            color: #2563eb;
+            text-decoration: none;
+        }
+        
+        .source-link:hover {
+            text-decoration: underline;
+        }
+        
+        .save-button {
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+            color: var(--color-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            border: none;
+            background: none;
+            cursor: pointer;
+            transition: color 0.15s ease;
+        }
+        
+        .save-button:hover {
+            color: #1d4ed8; /* darker blue */
+        }
+        
+        /* Dashboard Styling */
+        .dashboard-container {
+            height: 100%;
+            background-color: var(--color-white);
+            padding: 2rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+
+        .dashboard-title {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #374151;
+        }
+
+        .recent-query-item {
+            margin-bottom: 0.5rem;
+            padding: 0.75rem;
+            background-color: #f9fafb;
+            border-radius: 0.5rem;
+            border: 1px solid #e5e7eb;
+        }
+
+        .recent-query-text {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #111827;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .recent-query-time {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-top: 0.25rem;
+        }
+
+        .quick-links-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        @media (min-width: 768px) {
+            .quick-links-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .quick-link-item {
+            display: block;
+            padding: 1.5rem;
+            background-color: var(--color-accent);
+            color: var(--color-white);
+            border-radius: 0.75rem;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .quick-link-item:hover {
+            background-color: #2563eb;
+            box-shadow: 0 6px 10px -2px rgba(0, 0, 0, 0.15);
+            transform: translateY(-1px);
+        }
+        
+        .quick-link-item-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .quick-link-item-subtitle {
+            font-size: 0.875rem;
+            opacity: 0.9;
+            margin-top: 0.5rem;
+        }
+        
+        /* Saved Steps Styling */
+        .saved-container {
+            height: 100%;
+            background-color: var(--color-white);
+            padding: 2rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+
+        .saved-title {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .saved-item {
+            padding: 1rem;
+            border-left: 4px solid var(--color-green);
+            background-color: #f9fafb;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            position: relative;
+            margin-bottom: 1rem;
+        }
+
+        .delete-button {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            padding: 0.25rem;
+            color: #9ca3af;
+            transition: color 0.15s ease;
+            cursor: pointer;
+            border: none;
+            background: none;
+        }
+
+        .delete-button:hover {
+            color: var(--color-red);
+        }
+        
+        .saved-timestamp {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        .saved-text-body {
+            color: #111827;
+            white-space: pre-wrap;
+            font-size: 1rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .saved-empty-state {
+            text-align: center;
+            color: #6b7280;
+            padding: 2.5rem 0;
+        }
+
+        .saved-empty-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            margin: 0 auto 0.75rem;
+            color: #9ca3af;
+        }
+        
+        /* Error Styling */
+        .centered-container {
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--color-primary);
+            padding: 1rem;
+        }
+
+        .error-card {
+            background-color: var(--color-white);
+            padding: 2.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+            max-width: 32rem;
+            text-align: center;
+        }
+
+        .error-title {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: var(--color-red);
+            margin-bottom: 1rem;
+        }
+
+        .error-message {
+            font-size: 1.125rem;
+            color: #991b1b;
+            padding: 1rem;
+            border: 1px solid #fca5a5;
+            background-color: #fef2f2;
+            border-radius: 0.5rem;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+        
+        .error-note {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-top: 1rem;
+        }
+
+    </style>
+</head>
+<body class="min-h-screen flex items-stretch">
+    <!-- Main container where the application will be mounted -->
+    <div id="app-container" class="app-container-main">
+        <!-- Content will be rendered here by JavaScript -->
+    </div>
+
+    <script type="module">
+        // --- Configuration ---
+        // 🚨 CRITICAL: GEMINI API KEY IS SET HERE 🚨
+        const GEMINI_API_KEY = "AIzaSyDta5NhLpLxGlQt0IJzxZm_hGQw9NU9Krc"; 
+        const GEMINI_MODEL = 'gemini-2.5-flash-preview-05-20';
+        const ASSISTANT_SYSTEM_PROMPT = `You are GovAssist AI, a professional, empathetic, and highly accurate government procedures assistant. Your goal is to provide citizens with factual, step-by-step guidance on government protocols, forms, and services. You MUST use Google Search grounding to ensure accuracy and to reference official resources. Always respond in a professional and clear tone, using the language specified by the user. For processes, provide clear, numbered steps. Do not invent procedures or links.`;
+
+        const CORRECT_PASSWORD = 'arun0906'; // User-defined password
+
+        // --- Local Storage Keys (No server needed) ---
+        const CHAT_STORAGE_KEY = 'GA_CHAT_HISTORY';
+        const SAVED_STORAGE_KEY = 'GA_SAVED_STEPS';
+
+        // --- Application State ---
+        const appState = {
+            mode: 'home', // 'home' or 'full'
+            error: null,
+            page: 'dashboard', // 'chat', 'dashboard', 'saved' - Defaulting to dashboard after login
+            chatHistory: [],
+            savedSteps: [],
+            isThinking: false, 
+            lang: 'English', // 'English' or 'Malayalam'
+            isLoggedIn: false, // New state for login
+        };
+
+        const appContainer = document.getElementById('app-container');
+
+        // --- Persistence (localStorage) Functions ---
+
+        /**
+         * Loads data from localStorage.
+         * @param {string} key - The localStorage key.
+         * @returns {Array} Parsed data or an empty array.
+         */
+        function loadData(key) {
+            try {
+                const data = localStorage.getItem(key);
+                const parsed = data ? JSON.parse(data) : [];
+                
+                // For chat history and saved steps, convert timestamp strings back to Date objects
+                if (key === CHAT_STORAGE_KEY || key === SAVED_STORAGE_KEY) {
+                    return parsed.map(item => ({
+                        ...item,
+                        timestamp: item.timestamp ? new Date(item.timestamp) : new Date()
+                    }));
+                }
+                
+                return parsed;
+            } catch (e) {
+                console.error(`Error loading data from ${key}:`, e);
+                return [];
+            }
+        }
+
+        /**
+         * Saves data to localStorage.
+         * @param {string} key - The localStorage key.
+         * @param {Array} data - The array to save.
+         */
+        function saveData(key, data) {
+            try {
+                // Convert Date objects to ISO strings for JSON serialization
+                const serializableData = data.map(item => ({
+                    ...item,
+                    timestamp: item.timestamp ? item.timestamp.toISOString() : new Date().toISOString()
+                }));
+                
+                localStorage.setItem(key, JSON.stringify(serializableData));
+            } catch (e) {
+                console.error(`Error saving data to ${key}:`, e);
+            }
+        }
+
+        // --- Utility Functions ---
+
+        /**
+         * Renders the entire application based on the current appState.
+         */
+        function render() {
+            if (appState.error) {
+                renderError(appState.error);
+                return;
+            }
+
+            if (appState.mode === 'home') {
+                renderHomePage();
+            } else {
+                renderMainApp();
+            }
+            
+            // Re-attach listeners/handlers after rendering
+            setupEventListeners();
+        }
+        
+        // Helper function for exponential backoff
+        const withBackoff = async (fn, maxRetries = 5) => {
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    return await fn();
+                } catch (error) {
+                    if (i === maxRetries - 1) throw error;
+                    const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
+                    // console.warn(`Attempt ${i + 1} failed. Retrying in ${Math.round(delay/1000)}s...`, error); // Avoid logging during backoff
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                }
+            }
+        };
+
+        /**
+         * Runs the Gemini API with Google Search grounding.
+         */
+        const runGeminiApi = async (history, prompt, systemInstruction) => {
+            if (!GEMINI_API_KEY) {
+                 throw new Error("API Key is missing. Please update GEMINI_API_KEY in the script block. You must obtain your personal key from Google AI Studio.");
+            }
+
+            const chatHistory = history.map(msg => ({
+                role: msg.role === 'user' ? 'user' : 'model',
+                parts: [{ text: msg.text }]
+            }));
+            
+            chatHistory.push({ role: 'user', parts: [{ text: prompt }] });
+
+            const payload = {
+                contents: chatHistory,
+                tools: [{ "google_search": {} }],
+                systemInstruction: {
+                    parts: [{ text: systemInstruction }]
+                },
+            };
+
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+            console.log("Sending request to Gemini API...");
+
+            try {
+                const response = await withBackoff(() => fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                }));
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error("Gemini API Response Error:", response.status, errorText);
+                    throw new Error(`AI API call failed (Status: ${response.status}). Response: ${errorText.substring(0, 100)}...`);
+                }
+
+                const result = await response.json();
+                const candidate = result.candidates?.[0];
+
+                if (candidate && candidate.content?.parts?.[0]?.text) {
+                    const text = candidate.content.parts[0].text;
+                    let sources = [];
+                    const groundingMetadata = candidate.groundingMetadata;
+
+                    if (groundingMetadata && groundingMetadata.groundingAttributions) {
+                        sources = groundingMetadata.groundingAttributions
+                            .map(attribution => ({
+                                uri: attribution.web?.uri,
+                                title: attribution.web?.title,
+                            }))
+                            .filter(source => source.uri && source.title);
+                    }
+
+                    return { text, sources };
+                } else {
+                    console.error("AI assistant returned an empty or invalid response structure:", result);
+                    throw new Error("AI assistant returned an empty or invalid response.");
+                }
+            } catch (e) {
+                console.error("Final Gemini API execution error:", e);
+                throw e; 
+            }
+        };
+
+        // --- Core Application Logic ---
+
+        function initializeApp() {
+            // Load persistent data
+            appState.chatHistory = loadData(CHAT_STORAGE_KEY);
+            appState.savedSteps = loadData(SAVED_STORAGE_KEY);
+            
+            // Initial render
+            render();
+        }
+
+        async function handleChatSubmit(e) {
+            e.preventDefault(); 
+            
+            const inputField = document.getElementById('chat-input');
+            const userPrompt = inputField.value.trim();
+
+            if (!userPrompt || appState.isThinking) return;
+
+            // Clear input and set state to thinking
+            inputField.value = '';
+            inputField.focus(); 
+            appState.isThinking = true;
+            renderMainApp(); // Force re-render to disable input immediately
+
+            const userMessage = { 
+                id: Date.now(), 
+                role: 'user', 
+                text: userPrompt, 
+                timestamp: new Date() 
+            };
+            appState.chatHistory.push(userMessage);
+            saveData(CHAT_STORAGE_KEY, appState.chatHistory);
+
+            // Add temporary loading message (for immediate UI update)
+            const assistantId = Date.now() + 1;
+            const tempAssistantMessage = { 
+                id: assistantId,
+                role: 'assistant', 
+                text: '...', 
+                timestamp: new Date(),
+                loading: true 
+            };
+            appState.chatHistory.push(tempAssistantMessage);
+            saveData(CHAT_STORAGE_KEY, appState.chatHistory);
+            renderMainApp();
+            scrollToBottom();
+
+
+            try {
+                // Get context and call AI
+                const apiHistory = appState.chatHistory
+                    .filter(msg => msg.role !== 'system' && !msg.loading)
+                    .map(msg => ({ role: msg.role, text: msg.text }))
+                    .slice(-10); // Last 10 messages for context
+
+                const systemPrompt = `${ASSISTANT_SYSTEM_PROMPT} Current required response language: ${appState.lang}.`;
+                
+                const { text, sources } = await runGeminiApi(apiHistory, userPrompt, systemPrompt);
+
+                // Update the temporary message with the final response
+                const messageIndex = appState.chatHistory.findIndex(msg => msg.id === assistantId);
+                if (messageIndex !== -1) {
+                    appState.chatHistory[messageIndex] = {
+                        ...appState.chatHistory[messageIndex],
+                        text: text,
+                        sources: sources,
+                        loading: false,
+                        timestamp: new Date()
+                    };
+                }
+
+            } catch (e) {
+                console.error("AI Generation Process Error (Caught):", e);
+                
+                // Update the loading message with an error
+                const messageIndex = appState.chatHistory.findIndex(msg => msg.id === assistantId);
+                if (messageIndex !== -1) {
+                     appState.chatHistory[messageIndex] = {
+                        ...appState.chatHistory[messageIndex],
+                        text: `**ERROR:** The AI assistant failed to process your request. Please ensure the API key is valid. (Details: ${e.message})`,
+                        loading: false,
+                        error: true,
+                        timestamp: new Date()
+                    };
+                }
+            } finally {
+                appState.isThinking = false;
+                saveData(CHAT_STORAGE_KEY, appState.chatHistory);
+                renderMainApp();
+                scrollToBottom();
+            }
+        }
+        
+        async function handleSaveStep(messageData) {
+            const savedItem = {
+                id: Date.now(),
+                text: messageData.text,
+                timestamp: new Date(),
+                sources: messageData.sources || [],
+            };
+
+            appState.savedSteps.unshift(savedItem); // Add to the front
+            saveData(SAVED_STORAGE_KEY, appState.savedSteps);
+            renderMainApp();
+        }
+
+        async function handleDeleteStep(id) {
+            appState.savedSteps = appState.savedSteps.filter(step => step.id !== id);
+            saveData(SAVED_STORAGE_KEY, appState.savedSteps);
+            renderMainApp();
+        }
+        
+        function handleClearChat() {
+            // NOTE: Using window.confirm() for simplicity in this single-file app structure
+            if (confirm("Are you sure you want to clear the entire chat history? This action cannot be undone.")) {
+                appState.chatHistory = [];
+                saveData(CHAT_STORAGE_KEY, appState.chatHistory);
+                renderMainApp();
+            }
+        }
+
+        /**
+         * Sets the application language and triggers a full re-render.
+         * @param {string} lang - 'English' or 'Malayalam'
+         */
+        function setLanguage(lang) {
+            console.log(`Switching language to: ${lang}`);
+            appState.lang = lang;
+            render(); // Renders the entire app, which includes the chat and updates all messages/placeholders
+            scrollToBottom();
+        }
+
+        function scrollToBottom() {
+            const chatBody = document.getElementById('chat-body');
+            if (chatBody) {
+                setTimeout(() => {
+                    chatBody.scrollTop = chatBody.scrollHeight;
+                }, 50);
+            }
+        }
+        
+        // --- Mode Transition ---
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const passwordInput = document.getElementById('password-input');
+            const enteredPassword = passwordInput.value;
+            const errorMsg = document.getElementById('login-error');
+
+            if (enteredPassword === CORRECT_PASSWORD) {
+                appState.isLoggedIn = true;
+                appState.mode = 'full';
+                appState.page = 'dashboard'; // Start on dashboard
+                appState.error = null;
+                render();
+                // No need to scroll here since it's the dashboard
+            } else {
+                errorMsg.textContent = "Incorrect password. Please try again.";
+                errorMsg.style.display = 'block';
+                passwordInput.value = '';
+                passwordInput.focus();
+            }
+        }
+
+        
+        // --- Language and Welcome Messages ---
+        function getWelcomeMessage(lang) {
+            const messages = {
+                'English': {
+                    title: "Welcome to GovAssist AI.",
+                    body: "Ask me anything about government procedures, forms, or services. I'm here to help with clear, factual, step-by-step guidance.",
+                    current: "Current Language",
+                    placeholder: "Ask about applying for a passport, tax filing dates, etc."
+                },
+                'Malayalam': {
+                    title: "ഗോവ് അസിസ്റ്റ് എഐയിലേക്ക് സ്വാഗതം.", 
+                    body: "സർക്കാർ നടപടിക്രമങ്ങൾ, ഫോമുകൾ, അല്ലെങ്കിൽ സേവനങ്ങൾ എന്നിവയെക്കുറിച്ച് എന്തും ചോദിക്കാവുന്നതാണ്. വ്യക്തമായ, വസ്തുതാപരമായ, ഘട്ടം ഘട്ടമായുള്ള മാർഗ്ഗനിർദ്ദേശങ്ങൾ നൽകാൻ ഞാൻ ഇവിടെയുണ്ട്.", 
+                    current: "നിലവിലെ ഭാഷ", 
+                    placeholder: "പാസ്‌പോർട്ടിന് അപേക്ഷിക്കുന്നത്, നികുതി ഫയലിംഗ് തീയതികൾ മുതലായവയെക്കുറിച്ച് ചോദിക്കുക." 
+                }
+            };
+            return messages[lang] || messages['English'];
+        }
+
+        // --- Rendering Functions (UI) ---
+
+        function renderError(message) {
+            appContainer.className = "centered-container";
+            appContainer.innerHTML = `
+                <div class="error-card">
+                    <h1 class="error-title">Application Error</h1>
+                    <p class="error-message">
+                        ${message}
+                    </p>
+                    <p class="error-note">This application requires a successful, client-side connection to the Gemini API to function.</p>
+                </div>
+            `;
+        }
+        
+        function renderHomePage() {
+            appContainer.className = "home-container";
+            appContainer.innerHTML = `
+                <form id="login-form" class="home-card">
+                    <h1 class="home-title">
+                        GovAssist AI
+                    </h1>
+                    <p class="home-subtitle">
+                        Your trusted, factual guide for government procedures and services.
+                    </p>
+                    <p class="login-error" id="login-error" style="display: none;"></p>
+                    <input type="password" id="password-input" placeholder="Enter Password" class="login-input" required autofocus>
+                    <button type="submit" id="login-button" class="start-button">
+                        Login to Assistant
+                    </button>
+                </form>
+            `;
+            
+            document.getElementById('login-form').onsubmit = handleLogin;
+        }
+
+
+        function renderMainApp() {
+            const mainContentHTML = {
+                'dashboard': renderDashboardHTML(),
+                'chat': renderChatHTML(),
+                'saved': renderSavedHTML()
+            };
+
+            appContainer.innerHTML = `
+                <div class="app-container-main">
+                    <!-- Sidebar Navigation -->
+                    <aside class="sidebar">
+                        <div>
+                            <h1 class="sidebar-title">
+                                <span class='desktop-only'>GovAssist AI</span>
+                                <span class='mobile-only'>GA</span>
+                            </h1>
+                            <nav id="nav-buttons" class="nav-buttons"></nav>
+                        </div>
+                        <footer class="sidebar-footer">
+                            <span class="user-id-text">
+                                Client-Only Mode
+                            </span>
+                        </footer>
+                    </aside>
+
+                    <!-- Main Content Area -->
+                    <main class="main-content">
+                        <div class="content-area">
+                            ${mainContentHTML[appState.page]}
+                        </div>
+                    </main>
+                </div>
+            `;
+            
+            // Render Nav Buttons Dynamically
+            const navButtonsContainer = document.getElementById('nav-buttons');
+            navButtonsContainer.innerHTML = renderNavButtonsHTML();
+        }
+        
+        function renderNavButtonsHTML() {
+            const navItems = [
+                { page: 'dashboard', icon: renderIcon('dashboard'), text: 'Dashboard' },
+                { page: 'chat', icon: renderIcon('chat'), text: 'AI Chat', badge: appState.chatHistory.length > 0 ? appState.chatHistory.length : null },
+                { page: 'saved', icon: renderIcon('save'), text: 'Saved Steps', badge: appState.savedSteps.length > 0 ? appState.savedSteps.length : null }
+            ];
+            
+            return navItems.map(item => `
+                <button data-page="${item.page}" 
+                        class="nav-button ${appState.page === item.page ? 'active' : ''}">
+                    ${item.icon}
+                    <span class="nav-button-text">${item.text}</span>
+                    ${item.badge ? `<span class="nav-badge">${item.badge}</span>` : ''}
+                </button>
+            `).join('');
+        }
+
+        function renderDashboardHTML() {
+            const quickLinks = [
+                {
+                    title: "Aadhaar Status Check",
+                    subtitle: "Check Enrollment, Update, and Download Status.",
+                    icon: renderIcon('aadhaar'),
+                    url: "https://myaadhaar.uidai.gov.in/check-aadhaar-status"
+                },
+                {
+                    title: "Passport Status & Apply",
+                    subtitle: "Track application status or apply for a new passport.",
+                    icon: renderIcon('passport'),
+                    url: "https://portal2.passportindia.gov.in/AppOnlineProject/welcomeLink#",
+                },
+                {
+                    title: "Voter ID Status Check",
+                    subtitle: "Search electoral roll or track registration status.",
+                    icon: renderIcon('vote'),
+                    url: "https://voters.eci.gov.in/app/track-status"
+                },
+                {
+                    title: "PAN Card Status & Apply",
+                    subtitle: "Check PAN card status via NSDL/UTI.",
+                    icon: renderIcon('pan'),
+                    url: "https://tin.tin.nsdl.com/pantan/StatusTrack.html"
+                }
+            ];
+            
+            // Get last 5 queries (user messages)
+            const recentQueries = appState.chatHistory
+                .filter(msg => msg.role === 'user')
+                .slice(-5)
+                .reverse(); 
+
+            return `
+                <div class="dashboard-container h-full">
+                    <h2 class="dashboard-title">Assistant Dashboard</h2>
+
+                    <div class="mb-8">
+                        <h3 class="dashboard-section-title">Government Quick Links (Official Sources)</h3>
+                        <div class="quick-links-grid">
+                            ${quickLinks.map(link => `
+                                <a href="${link.url}" target="_blank" class="quick-link-item">
+                                    <div class="quick-link-item-title">
+                                        ${link.icon}
+                                        <span>${link.title}</span>
+                                    </div>
+                                    <div class="quick-link-item-subtitle">${link.subtitle}</div>
+                                </a>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="dashboard-section-title">Recent Chat Queries (${recentQueries.length} of ${appState.chatHistory.filter(msg => msg.role === 'user').length})</h3>
+                        ${recentQueries.length > 0 ? `
+                            <div class="space-y-3">
+                                ${recentQueries.map(query => `
+                                    <div class="recent-query-item">
+                                        <div class="recent-query-text">${query.text}</div>
+                                        <div class="recent-query-time">Asked ${formatDate(query.timestamp)}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : `
+                            <p class="text-gray-500 italic">No recent queries. Start chatting to see activity here!</p>
+                        `}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderChatHTML() {
+            const welcome = getWelcomeMessage(appState.lang);
+            return `
+                <div class="chat-container h-full">
+                    <div class="chat-header">
+                        <h2 class="text-xl font-semibold">GovAssist Chat</h2>
+                        <div class="space-x-2">
+                            <button data-lang="English" id="lang-en" class="lang-button ${appState.lang === 'English' ? 'active' : ''}">English</button>
+                            <button data-lang="Malayalam" id="lang-ml" class="lang-button ${appState.lang === 'Malayalam' ? 'active' : ''}">മലയാളം</button>
+                            <button id="clear-chat-button" class="lang-button hover:bg-red-500 border-red-300 text-white" style="border-color:#fca5a5; background-color: transparent;">
+                                ${renderIcon('trash')}
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="chat-body" class="chat-body">
+                        ${appState.chatHistory.length === 0 ? `
+                            <div class="text-center text-gray-500 mt-auto mb-auto p-4">
+                                <p class="text-lg font-medium mb-2">${welcome.title}</p>
+                                <p>${welcome.body}</p>
+                                <p class="mt-4 text-sm">${welcome.current}: <span class="font-semibold">${appState.lang}</span></p>
+                            </div>
+                        ` : appState.chatHistory.map(renderMessage).join('')}
+                    </div>
+                    
+                    <div class="chat-footer">
+                        <form id="chat-form" class="chat-form">
+                            <input type="text" id="chat-input" placeholder="${welcome.placeholder}" class="chat-input" required ${appState.isThinking ? 'disabled' : ''}>
+                            <button type="submit" class="send-button" ${appState.isThinking ? 'disabled' : ''}>
+                                ${appState.isThinking ? 
+                                    `<div class="loading-dot"></div>` : 
+                                    `Send`}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderSavedHTML() {
+            return `
+                <div class="saved-container h-full">
+                    <h2 class="saved-title">Saved Steps & Guidance (${appState.savedSteps.length})</h2>
+
+                    ${appState.savedSteps.length > 0 ? `
+                        <div class="space-y-4">
+                            ${appState.savedSteps.map(step => `
+                                <div class="saved-item">
+                                    <button data-id="${step.id}" class="delete-button">
+                                        ${renderIcon('close')}
+                                    </button>
+                                    <div class="saved-timestamp">Saved ${formatDate(step.timestamp)}</div>
+                                    <div class="saved-text-body">
+                                        ${step.text}
+                                    </div>
+                                    ${step.sources && step.sources.length > 0 ? `
+                                        <div class="source-container">
+                                            <p class="font-semibold">Sources:</p>
+                                            <ul class="source-list">
+                                                ${step.sources.map(s => `
+                                                    <li><a href="${s.uri}" target="_blank" class="source-link">${s.title}</a></li>
+                                                `).join('')}
+                                            </ul>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : `
+                        <div class="saved-empty-state">
+                            ${renderIcon('save-outline', 'saved-empty-icon')}
+                            <p class="text-lg">No saved steps yet.</p>
+                            <p class="mt-1">Save important steps and instructions from the chat by clicking the "Save Step" button.</p>
+                        </div>
+                    `}
+                </div>
+            `;
+        }
+
+        function renderMessage(message) {
+            const isUser = message.role === 'user';
+            const bubbleClass = isUser ? 'chat-bubble-user' : (message.error ? 'chat-bubble-error' : 'chat-bubble-ai');
+            const rowClass = isUser ? 'chat-user' : 'chat-assistant';
+            
+            // Format markdown text to HTML (simple formatting for bold/newline)
+            const formattedText = message.text
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\n/g, '<br>');
+
+            const messageHtml = message.loading ? `
+                <div class="message-loading">
+                    <span class="loading-dot"></span>
+                    <span class="loading-dot" style="animation-delay: 0.2s;"></span>
+                    <span class="loading-dot" style="animation-delay: 0.4s;"></span>
+                </div>
+            ` : formattedText;
+
+            // Only show save button for non-error assistant messages
+            const saveButton = (!isUser && !message.loading && !message.error) ? `
+                <button data-message-id="${message.id}" class="save-button save-step-button">
+                    ${renderIcon('save-small')} Save Step
+                </button>
+            ` : '';
+            
+            const sourcesHtml = (message.sources && message.sources.length > 0) ? `
+                <div class="source-container">
+                    <p class="font-semibold">Sources:</p>
+                    <ul class="source-list">
+                        ${message.sources.map(s => `
+                            <li><a href="${s.uri}" target="_blank" class="source-link">${s.title}</a></li>
+                        `).join('')}
+                    </ul>
+                </div>
+            ` : '';
+
+            return `
+                <div class="chat-message-row ${rowClass}">
+                    <div class="chat-bubble ${bubbleClass}">
+                        <div class="message-text">${messageHtml}</div>
+                        ${sourcesHtml}
+                        ${saveButton}
+                        <div class="mt-1 text-right text-xs text-gray-400">
+                             ${formatTime(message.timestamp)}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- Event Listener Setup ---
+
+        function setupEventListeners() {
+            // Navigation Clicks
+            document.querySelectorAll('#nav-buttons .nav-button').forEach(button => {
+                button.onclick = (e) => {
+                    const page = e.currentTarget.dataset.page;
+                    if (page) {
+                        appState.page = page;
+                        render();
+                    }
+                };
+            });
+            
+            // Chat Specific Listeners (only if on chat page)
+            if (appState.page === 'chat' && appState.mode === 'full') {
+                const chatForm = document.getElementById('chat-form');
+                if (chatForm) {
+                    chatForm.onsubmit = handleChatSubmit;
+                }
+                
+                // Language buttons - Event listeners are re-attached on every render() call
+                // FIX: Ensure listeners are correctly attached to the dynamic buttons
+                const langEnButton = document.getElementById('lang-en');
+                const langMlButton = document.getElementById('lang-ml');
+
+                if (langEnButton) {
+                    langEnButton.onclick = (e) => setLanguage('English');
+                }
+                if (langMlButton) {
+                    langMlButton.onclick = (e) => setLanguage('Malayalam');
+                }
+                
+                // Clear chat button
+                const clearChatButton = document.getElementById('clear-chat-button');
+                if (clearChatButton) {
+                    clearChatButton.onclick = handleClearChat;
+                }
+
+                // Save step buttons
+                document.querySelectorAll('.save-step-button').forEach(button => {
+                    button.onclick = (e) => {
+                        // Correctly parse data-message-id as an integer
+                        const messageId = parseInt(e.currentTarget.getAttribute('data-message-id'));
+                        const messageData = appState.chatHistory.find(msg => msg.id === messageId);
+                        if (messageData) {
+                            handleSaveStep(messageData);
+                        }
+                    };
+                });
+            }
+            
+            // Saved Steps Specific Listeners (only if on saved page)
+            if (appState.page === 'saved' && appState.mode === 'full') {
+                document.querySelectorAll('.delete-button').forEach(button => {
+                    button.onclick = (e) => {
+                        const id = parseInt(e.currentTarget.dataset.id);
+                        // Using a custom modal/confirmation is preferred over standard confirm()
+                        if (confirm("Are you sure you want to delete this saved step?")) {
+                            handleDeleteStep(id);
+                        }
+                    };
+                });
+            }
+        }
+
+        // --- Helper Formatting Functions ---
+
+        function formatDate(date) {
+            const now = new Date();
+            const diffInDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+            
+            if (diffInDays === 0) {
+                return `Today at ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+            } else if (diffInDays === 1) {
+                return `Yesterday at ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+            } else {
+                return date.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
+            }
+        }
+
+        function formatTime(date) {
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+        
+        // --- Icon Rendering (Inline SVG) ---
+
+        function renderIcon(name, classes = 'nav-button-icon') {
+            let svgContent = '';
+            
+            // Icons for sidebar navigation
+            const navIcons = {
+                'dashboard': `<path d="M21 17h-8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2z"/><path d="M7 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><rect x="1" y="15" width="4" height="6"/><path d="M10 21h13"/>`,
+                'chat': `<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>`,
+                'save': `<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>`,
+                'save-outline': `<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/>`,
+                'save-small': `<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>`,
+                'trash': `<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>`,
+                'close': `<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>`
+            };
+
+            // Icons for quick links (using a smaller, distinct size)
+            const linkIcons = {
+                'aadhaar': `<path d="M12 2a10 10 0 0 0-9 5l3 3m15 0-3-3a10 10 0 0 0-18 0"/><path d="M12 22s-8-5-8-10c0-4 4-8 8-8s8 4 8 8c0 5-8 10-8 10z"/><circle cx="12" cy="10" r="2"/><path d="M16 16c-1 1-2 2-4 2s-3-1-4-2"/>`, // Custom Identity Icon
+                'passport': `<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M8 5v14"/><path d="M16 5v14"/><path d="M10 10h4"/><path d="M10 14h4"/>`, // Custom Passport Icon
+                'vote': `<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/><path d="M10 17l2 2l4-4"/>`, // Custom Vote/Checkmark Icon
+                'pan': `<rect x="3" y="5" width="18" height="14" rx="2"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="15" x2="16" y2="15"/><line x1="5" y1="12" x2="19" y2="12"/>` // Custom Card/Document Icon
+            };
+            
+            if (navIcons[name]) {
+                svgContent = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${navIcons[name]}</svg>`;
+            } else if (linkIcons[name]) {
+                // Use a smaller size for link icons and set the classes to ensure it looks good inside the button
+                classes = 'w-6 h-6 flex-shrink-0';
+                svgContent = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${linkIcons[name]}</svg>`;
+            }
+
+            return `<span class="${classes}">${svgContent}</span>`;
+        }
+
+
+        // Start the application
+        initializeApp();
+    </script>
+</body>
+</html>
